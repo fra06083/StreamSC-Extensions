@@ -9,8 +9,8 @@
     "Live"
   ],
   "status": 0,
-  "author": "doGior",
-  "iconUrl": "https://raw.githubusercontent.com/doGior/doGiorsHadEnough/refs/heads/master/DaddyLive/live-streaming.png",
+  "author": "biglie",
+  "iconUrl": "https://raw.githubusercontent.com/fra06083/StreamSC-Extensions/main/daddylive.scext/icon.png",
   "capabilities": {
     "hasMainPage": true,
     "hasSearch": true,
