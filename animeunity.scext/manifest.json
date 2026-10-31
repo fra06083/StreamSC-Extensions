@@ -1,0 +1,39 @@
+{
+  "id": "animeunity",
+  "name": "AnimeUnity",
+  "version": "40",
+  "description": "Anime SUB ITA e ITA da AnimeUnity",
+  "language": "it",
+  "baseUrl": "https://www.animeunity.co",
+  "types": [
+    "Anime",
+    "AnimeMovie",
+    "OVA"
+  ],
+  "status": 1,
+  "author": "doGior",
+  "iconUrl": "https://www.animeunity.co/apple-touch-icon.png",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": [
+    {
+      "key": "latest",
+      "label": "Ultimi episodi"
+    },
+    {
+      "key": "popular",
+      "label": "In evidenza"
+    },
+    {
+      "key": "top",
+      "label": "Top Anime"
+    },
+    {
+      "key": "archive",
+      "label": "Catalogo Anime"
+    }
+  ]
+}

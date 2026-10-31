@@ -1,0 +1,39 @@
+{
+  "id": "animesaturn",
+  "name": "AnimeSaturn",
+  "version": "40",
+  "description": "Anime in Streaming SUB ITA e ITA da AnimeSaturn",
+  "language": "it",
+  "baseUrl": "https://animesaturn.at",
+  "types": [
+    "Anime",
+    "AnimeMovie",
+    "OVA"
+  ],
+  "status": 1,
+  "author": "StreamSC",
+  "iconUrl": "https://animesaturn.at/assets/saturn/img/favicon-192.png",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": [
+    {
+      "key": "latest",
+      "label": "Ultime uscite"
+    },
+    {
+      "key": "trending",
+      "label": "Più visti questa settimana"
+    },
+    {
+      "key": "fresh",
+      "label": "Nuove aggiunte"
+    },
+    {
+      "key": "ongoing",
+      "label": "Anime in corso"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "daddylive",
+  "name": "DaddyLive",
+  "version": "16",
+  "description": "Live TV from DaddyLive. You might need a VPN",
+  "language": "en",
+  "baseUrl": "https://dlhd.dad",
+  "types": [
+    "Live"
+  ],
+  "status": 0,
+  "author": "doGior",
+  "iconUrl": "https://raw.githubusercontent.com/doGior/doGiorsHadEnough/refs/heads/master/DaddyLive/live-streaming.png",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": []
+}

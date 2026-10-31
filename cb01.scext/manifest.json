@@ -1,0 +1,27 @@
+{
+  "id": "cb01",
+  "name": "CB01",
+  "version": "13",
+  "description": "Movies and Shows from CB01",
+  "language": "it",
+  "baseUrl": "https://cb01uno.uno",
+  "types": [
+    "Movie",
+    "TvSeries",
+    "Cartoon"
+  ],
+  "status": 0,
+  "author": "doGior",
+  "iconUrl": "https://cb01.uno/apple-icon-180x180px.png",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": [
+    {
+      "key": "$mainUrl/serietv",
+      "label": "Serie TV"
+    }
+  ]
+}

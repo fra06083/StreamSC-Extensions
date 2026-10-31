@@ -1,0 +1,44 @@
+{
+  "id": "streamingcommunity",
+  "name": "StreamingCommunity",
+  "version": "40",
+  "description": "Film e serie TV da StreamingCommunity",
+  "language": "it",
+  "baseUrl": "https://streamingcommunityz.day",
+  "types": [
+    "TvSeries",
+    "Movie",
+    "Documentary",
+    "Cartoon"
+  ],
+  "status": 1,
+  "author": "doGior",
+  "iconUrl": "https://streamingcommunityz.day/apple-touch-icon.png?v=2",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": [
+    {
+      "key": "trending",
+      "label": "I titoli del momento"
+    },
+    {
+      "key": "latest",
+      "label": "Aggiunti di recente"
+    },
+    {
+      "key": "movies",
+      "label": "Film"
+    },
+    {
+      "key": "tv-shows",
+      "label": "Serie TV"
+    },
+    {
+      "key": "top10",
+      "label": "Top 10 oggi"
+    }
+  ]
+}

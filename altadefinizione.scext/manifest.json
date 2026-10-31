@@ -1,0 +1,123 @@
+{
+  "id": "altadefinizione",
+  "name": "AltaDefinizione",
+  "version": "8",
+  "description": "Movies and Tv Series from Altadefinizione",
+  "language": "it",
+  "baseUrl": "https://altadefinizione.autos",
+  "types": [
+    "Movie",
+    "TvSeries",
+    "Documentary"
+  ],
+  "status": 0,
+  "author": "doGior",
+  "iconUrl": "https://altadefinizione.autos/templates/Dark/img/favicon.ico",
+  "capabilities": {
+    "hasMainPage": true,
+    "hasSearch": true,
+    "hasLoadLinks": true
+  },
+  "mainPageSections": [
+    {
+      "key": "$mainUrl/film/",
+      "label": "Ultimi Aggiunti"
+    },
+    {
+      "key": "$mainUrl/cinema/",
+      "label": "Ora al Cinema"
+    },
+    {
+      "key": "$mainUrl/netflix-streaming/",
+      "label": "Netflix"
+    },
+    {
+      "key": "$mainUrl/animazione/",
+      "label": "Animazione"
+    },
+    {
+      "key": "$mainUrl/avventura/",
+      "label": "Avventura"
+    },
+    {
+      "key": "$mainUrl/azione/",
+      "label": "Azione"
+    },
+    {
+      "key": "$mainUrl/biografico/",
+      "label": "Biografico"
+    },
+    {
+      "key": "$mainUrl/commedia/",
+      "label": "Commedia"
+    },
+    {
+      "key": "$mainUrl/crime/",
+      "label": "Crimine"
+    },
+    {
+      "key": "$mainUrl/documentario/",
+      "label": "Documentario"
+    },
+    {
+      "key": "$mainUrl/drammatico/",
+      "label": "Drammatico"
+    },
+    {
+      "key": "$mainUrl/erotico/",
+      "label": "Erotico"
+    },
+    {
+      "key": "$mainUrl/famiglia/",
+      "label": "Famiglia"
+    },
+    {
+      "key": "$mainUrl/fantascienza/",
+      "label": "Fantascienza"
+    },
+    {
+      "key": "$mainUrl/fantasy/",
+      "label": "Fantasy"
+    },
+    {
+      "key": "$mainUrl/giallo/",
+      "label": "Giallo"
+    },
+    {
+      "key": "$mainUrl/guerra/",
+      "label": "Guerra"
+    },
+    {
+      "key": "$mainUrl/horror/",
+      "label": "Horror"
+    },
+    {
+      "key": "$mainUrl/musical/",
+      "label": "Musical"
+    },
+    {
+      "key": "$mainUrl/poliziesco/",
+      "label": "Poliziesco"
+    },
+    {
+      "key": "$mainUrl/romantico/",
+      "label": "Romantico"
+    },
+    {
+      "key": "$mainUrl/sportivo/",
+      "label": "Sportivo"
+    },
+    {
+      "key": "$mainUrl/storico-streaming/",
+      "label": "Storico"
+    },
+    {
+      "key": "$mainUrl/thriller/",
+      "label": "Thriller"
+    },
+    {
+      "key": "$mainUrl/western/",
+      "label": "Western"
+    }
+  ]
+}
