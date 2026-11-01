@@ -31,8 +31,8 @@ async function fetchText(url, options) {
 }
 
 async function fetchJSON(url, options) {
-    const response = await providerFetch(url, options);
-    return response.json();
+    const text = await fetchText(url, options);
+    return JSON.parse(text);
 }
 
 const pageCache = {};
@@ -204,14 +204,77 @@ async function getMainPage(page, sectionKey) {
 
 // ─── Search ──────────────────────────────────────────────────────────────────
 
+function parseAjaxSearchItems(html) {
+    const items = [];
+    const seen = {};
+    const itemRegex = /<a[^>]+class="[^"]*\bitem\b[^"]*"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let m;
+    while ((m = itemRegex.exec(html)) !== null) {
+        const rawHref = decodeEntities(m[1]);
+        const body = m[2];
+        const animeURL = normalizeAnimeURL(rawHref);
+        const slugMatch = animeURL.match(/\/anime\/([^/?#]+)/i);
+        const id = slugMatch && slugMatch[1] ? slugMatch[1] : animeURL;
+        if (seen[id]) continue;
+
+        const imgMatch = body.match(/<img[^>]+src="([^"]+)"[^>]*?(?:alt="([^"]*)")?/i);
+        const poster = imgMatch && imgMatch[1] ? absoluteURL(decodeEntities(imgMatch[1])) : null;
+        const nameMatch = body.match(/<div[^>]+class="[^"]*\bname\b[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+        const title = nameMatch ? stripTags(nameMatch[1]) : (imgMatch && imgMatch[2] ? decodeEntities(imgMatch[2]).trim() : "");
+        if (!title) continue;
+
+        const dotMatch = body.match(/<span[^>]+class="dot"[^>]*>([^<]+)<\/span>/i);
+        seen[id] = true;
+        items.push({
+            id: id,
+            title: title,
+            type: mapMediaType(dotMatch ? dotMatch[1].trim() : "TV"),
+            poster: poster,
+            backdrop: deriveBanner(poster),
+            url: animeURL,
+            year: null,
+            quality: "SUB"
+        });
+    }
+    return items;
+}
+
 async function search(query, page) {
     const trimmed = String(query || "").trim();
     if (!trimmed) return [];
     const p = page && Number(page) > 1 ? Number(page) : 1;
     let url = BASE_URL + "/filter?keyword=" + encodeURIComponent(trimmed);
     if (p > 1) url += "&page=" + p;
-    const html = await fetchText(url);
-    return parseCardsFromHTML(html);
+
+    let items = [];
+    try {
+        const html = await fetchText(url);
+        items = parseCardsFromHTML(html);
+    } catch (_) {}
+
+    if (p === 1) {
+        try {
+            const ajax = await fetchJSON(BASE_URL + "/ajax/anime/search?keyword=" + encodeURIComponent(trimmed), {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json, text/javascript, */*; q=0.01"
+                }
+            });
+            const ajaxHTML = (ajax && ajax.result && ajax.result.html) ? String(ajax.result.html) : "";
+            const ajaxItems = parseAjaxSearchItems(ajaxHTML);
+            const seen = {};
+            const merged = [];
+            ajaxItems.concat(items).forEach(function (it) {
+                if (it && it.id && !seen[it.id]) {
+                    seen[it.id] = true;
+                    merged.push(it);
+                }
+            });
+            items = merged;
+        } catch (_) {}
+    }
+
+    return items;
 }
 
 // ─── Detail ──────────────────────────────────────────────────────────────────
@@ -230,7 +293,7 @@ function extractSeriesLD(html) {
     return null;
 }
 
-function parseEpisodesFromAnimePage(html, defaultPoster) {
+function parseEpisodesFromAnimePage(html, defaultPoster, malId, anilistId) {
     const episodes = [];
     const seen = {};
     const epRegex = /<a[^>]+class="[^"]*\ban-ep\b[^"]*"[^>]*>/gi;
@@ -260,7 +323,9 @@ function parseEpisodesFromAnimePage(html, defaultPoster) {
             poster: defaultPoster || null,
             loadData: JSON.stringify({
                 url: watchURL,
-                episode: number
+                episode: number,
+                mal_id: malId || null,
+                anilist_id: anilistId || null
             })
         });
     }
@@ -276,6 +341,11 @@ async function load(url) {
 
     const slugMatch = animeURL.match(/\/anime\/([^/?#]+)/i);
     const id = slugMatch && slugMatch[1] ? slugMatch[1] : animeURL;
+
+    const malMatch = html.match(/myanimelist\.net\/anime\/(\d+)/i);
+    const anilistMatch = html.match(/anilist\.co\/anime\/(\d+)/i);
+    const malId = malMatch ? parseInt(malMatch[1], 10) : null;
+    const anilistId = anilistMatch ? parseInt(anilistMatch[1], 10) : null;
 
     let title = ld.name ? String(ld.name).trim() : "";
     if (!title) {
@@ -305,10 +375,12 @@ async function load(url) {
         if (isFinite(s)) score = s;
     }
 
-    const episodes = parseEpisodesFromAnimePage(html, background || poster);
+    const episodes = parseEpisodesFromAnimePage(html, background || poster, malId, anilistId);
     const firstLoadData = episodes.length > 0 ? episodes[0].loadData : JSON.stringify({
         url: BASE_URL + "/watch/" + id + "/ep-1",
-        episode: 1
+        episode: 1,
+        mal_id: malId || null,
+        anilist_id: anilistId || null
     });
 
     const isMovie = ld["@type"] === "Movie" && episodes.length <= 1;
@@ -466,5 +538,8 @@ async function loadLinks(data) {
         } catch (_) {}
     }
 
+    links.sort(function (a, b) {
+        return (b.quality || 0) - (a.quality || 0);
+    });
     return links;
 }

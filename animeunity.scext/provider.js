@@ -31,8 +31,8 @@ async function fetchText(url, options) {
 }
 
 async function fetchJSON(url, options) {
-    const response = await providerFetch(url, options);
-    return response.json();
+    const text = await fetchText(url, options);
+    return JSON.parse(text);
 }
 
 const pageCache = {};
@@ -175,13 +175,29 @@ async function getMainPage(page, sectionKey) {
 
 // ─── Search ──────────────────────────────────────────────────────────────────
 
+function searchRank(item, query) {
+    const q = String(query || "").toLowerCase();
+    const t = String(item.title || "").toLowerCase();
+    const clean = t.replace(/\s*\(ita\)\s*$/i, "").trim();
+    let score = 0;
+    if (clean === q || t === q) score += 100;
+    else if (clean.indexOf(q) === 0) score += 60;
+    else if (t.indexOf(q) >= 0) score += 30;
+    if (item.type === "Anime") score += 25;
+    return score;
+}
+
 async function search(query, page) {
     const trimmed = String(query || "").trim();
     if (!trimmed) return [];
     const url = BASE_URL + "/archivio?title=" + encodeURIComponent(trimmed);
     const html = await fetchText(url);
     const list = extractJSONAttribute(html, "archivio", "records") || [];
-    return dedupeItems((Array.isArray(list) ? list : []).map(buildMediaItem).filter(Boolean));
+    const items = dedupeItems((Array.isArray(list) ? list : []).map(buildMediaItem).filter(Boolean));
+    items.sort(function (a, b) {
+        return searchRank(b, trimmed) - searchRank(a, trimmed);
+    });
+    return items;
 }
 
 // ─── Detail ──────────────────────────────────────────────────────────────────

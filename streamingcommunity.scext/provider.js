@@ -91,9 +91,12 @@ function extractPage(html) {
 
 function absoluteURL(path) {
     if (!path) return "";
-    if (path.indexOf("http://") === 0 || path.indexOf("https://") === 0) return path;
-    if (path.charAt(0) === "/") return BASE_URL + path;
-    return BASE_URL + "/" + path;
+    const str = String(path).trim();
+    if (str.indexOf("http://") === 0 || str.indexOf("https://") === 0) {
+        return str.replace(/^https?:\/\/[^/]*(?:streamingcommunity|streamingunity)[^/]*/i, BASE_URL);
+    }
+    if (str.charAt(0) === "/") return BASE_URL + str;
+    return BASE_URL + "/" + str;
 }
 
 function normalizeTitleURL(rawURL) {
@@ -260,7 +263,9 @@ function buildEpisode(episode, title, cdn, seasonNumber) {
         title_id: title.id,
         episode_id: episode.id,
         season: seasonNumber,
-        episode: number
+        episode: number,
+        imdb_id: title.imdb_id || null,
+        tmdb_id: title.tmdb_id || null
     };
     return {
         id: String(episode.id),
@@ -370,7 +375,9 @@ async function load(url) {
         seasons: seasons,
         loadData: JSON.stringify({
             url: BASE_URL + "/it/watch/" + title.id,
-            title_id: title.id
+            title_id: title.id,
+            imdb_id: title.imdb_id || null,
+            tmdb_id: title.tmdb_id || null
         })
     };
 }
@@ -460,19 +467,46 @@ async function resolveVixCloud(embedURL, referer) {
 async function loadLinks(data) {
     const info = parseLoadData(data);
     let watchURL = info.url || "";
+    let titleId = info.title_id || null;
+    let episodeId = info.episode_id || null;
 
     if (watchURL) {
         watchURL = absoluteURL(watchURL);
-        const titleMatch = watchURL.match(/\/titles\/([0-9]+)/);
-        if (titleMatch) {
-            watchURL = BASE_URL + "/it/watch/" + titleMatch[1];
-            if (info.episode_id) watchURL += "?e=" + info.episode_id;
+        const titleMatch = watchURL.match(/\/(?:titles|watch)\/([0-9]+)/);
+        if (titleMatch && !titleId) {
+            titleId = titleMatch[1];
+        }
+        const epQueryMatch = watchURL.match(/[?&]e=([0-9]+)/);
+        if (epQueryMatch && !episodeId) {
+            episodeId = epQueryMatch[1];
         }
     }
 
-    if (!watchURL && info.title_id) {
-        watchURL = BASE_URL + "/it/watch/" + info.title_id;
-        if (info.episode_id) watchURL += "?e=" + info.episode_id;
+    if (!episodeId && titleId && info.season && info.episode) {
+        try {
+            const seasonHTML = await fetchText(BASE_URL + "/it/titles/" + titleId + "/season-" + info.season);
+            const seasonPage = extractPage(seasonHTML);
+            const loadedSeason = seasonPage.props && seasonPage.props.loadedSeason;
+            const episodes = (loadedSeason && Array.isArray(loadedSeason.episodes)) ? loadedSeason.episodes : [];
+            const matched = episodes.find(function (ep) {
+                return ep && Number(ep.number) === Number(info.episode);
+            });
+            if (matched && matched.id != null) {
+                episodeId = matched.id;
+            }
+        } catch (_) {}
+    }
+
+    if (watchURL && /\/titles\/[0-9]+/.test(watchURL)) {
+        watchURL = BASE_URL + "/it/watch/" + titleId;
+        if (episodeId) watchURL += "?e=" + episodeId;
+    } else if (watchURL && episodeId && !/[?&]e=/.test(watchURL)) {
+        watchURL += (watchURL.indexOf("?") >= 0 ? "&" : "?") + "e=" + episodeId;
+    }
+
+    if (!watchURL && titleId) {
+        watchURL = BASE_URL + "/it/watch/" + titleId;
+        if (episodeId) watchURL += "?e=" + episodeId;
     }
 
     if (!watchURL) {
@@ -491,7 +525,7 @@ async function loadLinks(data) {
         embedURL = watchPage.props.embedUrl || "";
         if (!embedURL && watchPage.props.title && watchPage.props.title.id != null) {
             embedURL = BASE_URL + "/it/iframe/" + watchPage.props.title.id;
-            if (info.episode_id) embedURL += "?episode_id=" + info.episode_id;
+            if (episodeId) embedURL += "?episode_id=" + episodeId;
         }
     }
 
