@@ -1,6 +1,6 @@
 /**
  * StreamSC Provider: StreamingCommunity
- * Site: https://streamingcommunityz.day
+ * Site: https://streamingcommunityz.foo
  *
  * Il sito espone i dati tramite Inertia (attributo data-page nell'HTML SSR).
  * Questo provider non usa il DOM: estrae il JSON, risolve la pagina watch/iframe
@@ -9,9 +9,9 @@
 
 "use strict";
 
-const BASE_URL = "https://streamingcommunityz.day";
+const BASE_URL = "https://streamingcommunityz.foo";
 const PROVIDER_ID = "streamingcommunity";
-const DEFAULT_CDN = "https://cdn.streamingcommunityz.day";
+const DEFAULT_CDN = "https://cdn.streamingcommunityz.foo";
 
 const DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
