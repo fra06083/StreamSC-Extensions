@@ -1,0 +1,54 @@
+name: Update StreamingCommunity domain
+
+on:
+  schedule:
+    # Every hour; the official channel posts only when the domain changes.
+    - cron: "23 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/update_streamingcommunity_domain.py"
+      - ".github/workflows/update-streamingcommunity-domain.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-streamingcommunity-domain
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Resolve domain from Telegram
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update extension domain
+        run: python3 scripts/update_streamingcommunity_domain.py
+
+      - name: Validate provider
+        run: node --check streamingcommunity.scext/provider.js
+
+      - name: Commit and push when changed
+        run: |
+          if git diff --quiet -- streamingcommunity.scext; then
+            echo "Domain unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add streamingcommunity.scext/manifest.json streamingcommunity.scext/provider.js
+          git commit -m "chore(streamingcommunity): auto-update domain from Telegram"
+          git push

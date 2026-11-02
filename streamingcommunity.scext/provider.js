@@ -445,23 +445,30 @@ async function resolveVixCloud(embedURL, referer) {
     }
     playlistURL = playlistURL.split("?")[0];
 
-    let finalToken = token;
-    let finalExpires = expires;
-    if (!finalToken || !finalExpires) {
-        const query = embedURL.split("?")[1] || "";
-        const params = {};
-        query.split("&").forEach(function (pair) {
-            const parts = pair.split("=");
-            if (parts[0]) params[parts[0]] = decodeURIComponent(parts[1] || "");
-        });
-        finalToken = finalToken || params.token;
-        finalExpires = finalExpires || params.expires;
-    }
+    const query = embedURL.split("?")[1] || "";
+    const params = {};
+    query.split("&").forEach(function (pair) {
+        const parts = pair.split("=");
+        if (parts[0]) params[parts[0]] = decodeURIComponent(parts[1] || "");
+    });
+
+    let finalToken = token || params.token;
+    let finalExpires = expires || params.expires;
     if (!finalToken || !finalExpires) {
         throw new Error("VixCloud: token scaduto o assente");
     }
 
-    return playlistURL + "?ub=1&token=" + encodeURIComponent(finalToken) + "&expires=" + encodeURIComponent(finalExpires);
+    // VixCloud answers HTTP 403 on the master playlist unless FHD-enabled
+    // embeds also carry `h=1`, exactly like the site's own player does.
+    const canPlayFHD = params.canPlayFHD && params.canPlayFHD !== "0" && params.canPlayFHD !== "false";
+
+    let streamURL = playlistURL
+        + "?ub=1&token=" + encodeURIComponent(finalToken)
+        + "&expires=" + encodeURIComponent(finalExpires);
+    if (canPlayFHD) {
+        streamURL += "&h=1";
+    }
+    return streamURL;
 }
 
 async function loadLinks(data) {
