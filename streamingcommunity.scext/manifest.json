@@ -1,10 +1,10 @@
 {
   "id": "streamingcommunity",
   "name": "StreamingCommunity",
-  "version": "44",
+  "version": "45",
   "description": "Film e serie TV da StreamingCommunity",
   "language": "it",
-  "baseUrl": "https://streamingcommunityz.nexus",
+  "baseUrl": "https://streamingcommunityz.dad",
   "types": [
     "TvSeries",
     "Movie",
@@ -13,7 +13,7 @@
   ],
   "status": 1,
   "author": "biglie",
-  "iconUrl": "https://streamingcommunityz.nexus/apple-touch-icon.png?v=2",
+  "iconUrl": "https://streamingcommunityz.dad/apple-touch-icon.png?v=2",
   "capabilities": {
     "hasMainPage": true,
     "hasSearch": true,
