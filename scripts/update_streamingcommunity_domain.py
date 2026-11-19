@@ -18,6 +18,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -203,28 +204,41 @@ def main() -> int:
             errors.append(f"{name}: {error}")
 
     if body is None:
-        print("Could not read the Telegram channel from any source:", file=sys.stderr)
+        print("::warning::Could not read the Telegram channel from any source.")
         for error in errors:
             print(f"  - {error}", file=sys.stderr)
-        return 1
+        return 0
 
     candidates = domain_candidates(body)
     if not candidates:
-        print(f"No StreamingCommunity domain found in {source_name} output.", file=sys.stderr)
-        return 1
+        print(f"::warning::No StreamingCommunity domain found in {source_name} output.")
+        return 0
+
+    # The current domain is a valid fallback: the channel may announce a
+    # domain that is not live yet, or the site may be temporarily unreachable.
+    if current_host and current_host not in candidates:
+        candidates.append(current_host)
 
     resolved = None
-    for candidate in candidates:
-        resolved = canonical_domain(candidate)
+    for attempt in range(2):
+        for candidate in candidates:
+            resolved = canonical_domain(candidate)
+            if resolved:
+                break
         if resolved:
             break
+        if attempt == 0:
+            print("No candidate passed live validation, retrying in 5s...", file=sys.stderr)
+            time.sleep(5)
 
     if not resolved:
+        # A scheduled run should not turn red for a transient Telegram/Cloudflare
+        # outage: the next hourly run retries. Report it as a warning instead.
         print(
-            "No candidate passed live validation: " + ", ".join(candidates),
-            file=sys.stderr,
+            "::warning::No candidate passed live validation: "
+            + ", ".join(candidates)
         )
-        return 1
+        return 0
 
     print(f"Source: {source_name}")
     print(f"Current: {current_host or '(none)'}")
